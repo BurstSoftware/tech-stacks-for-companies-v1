@@ -1,0 +1,1 @@
+This repository is filled with tech stacks for technical companies.  The tech stacks are transformed into tools used for daily operations of those tech stacks to preform those daily objectives in a productive / efficient way.
