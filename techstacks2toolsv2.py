@@ -3,18 +3,22 @@ import streamlit as st
 import requests
 import json
 
-def process_job_description(api_key, job_description):
+def process_job_description(api_key, job_description, detailed_breakdown=False):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
+    
+    if detailed_breakdown:
+        prompt = f"""Analyze this job description and provide a detailed breakdown in the following structured format:
+        - Tools and Tech Stack: [list specific tools/tech mentioned in the job description]
+        - Desired Activities: [list specific activities the employee would perform]
+        - Required Skills: [list specific skills required for the role]
+        Job Description: {job_description}"""
+    else:
+        prompt = f"Analyze this job description and suggest a Streamlit tool design to accomplish the tasks described: {job_description}"
+
     payload = {
         "contents": [{
-            "parts": [{
-                "text": """Analyze this job description and provide a detailed breakdown in the following structured format:
-                - Tools and Tech Stack: [list specific tools/tech mentioned in the job description]
-                - Desired Activities: [list specific activities the employee would perform]
-                - Required Skills: [list specific skills required for the role]
-                Job Description: """ + job_description
-            }]
+            "parts": [{"text": prompt}]
         }]
     }
     try:
@@ -50,18 +54,12 @@ def generate_workflow_code(analysis):
     # Base import - only Streamlit is assumed
     imports = ["import streamlit as st"]
 
-    # Workflow steps from activities
-    workflow_steps = [activity.strip() for activity in activities if activity.strip()]
-    if not workflow_steps:
-        workflow_steps = ["General Task"]  # Fallback if no activities specified
-
-    # Generate skills markdown content without backslashes in f-string
+    workflow_steps = [activity.strip() for activity in activities if activity.strip()] or ["General Task"]
     skills_list = "\n".join(f"- {skill}" for skill in skills if skill) if skills else "No skills identified"
     skills_markdown = f"""st.markdown('''
 {skills_list}
 ''')"""
 
-    # Generate main workflow code
     main_code = """# daily_workflow.py
 import streamlit as st
 
@@ -82,9 +80,7 @@ def main():
     for step in workflow_steps:
         main_code += f"""    if step == "{step}":
         st.header("{step}")
-        # Select tool relevant to this activity
         tool = st.selectbox("Select Tool for {step}", TOOLS)
-        # Generic input for task details
         task_details = st.text_area("Task Details", "Describe your work with {{tool}} here")
         if st.button("Execute {step}"):
             st.success(f"Executed '{step}' using {{tool}}")
@@ -92,7 +88,7 @@ def main():
 """
 
     main_code += """
-    # Collaboration section (generic)
+    # Collaboration section
     with st.expander("Collaboration"):
         report_content = st.text_area("Report Content", "Daily update...")
         if st.button("Generate Report"):
@@ -132,38 +128,50 @@ def main():
             if uploaded_file:
                 job_description = uploaded_file.read().decode("utf-8")
 
-    if st.button("Analyze Tools & Skills"):
+    # Process button outside tabs
+    if st.button("Process Job Description"):
         if not api_key or not job_description:
             st.error("Please provide both API key and job description")
         else:
-            with st.spinner("Analyzing job description..."):
-                result = process_job_description(api_key, job_description)
-                
-                st.subheader("Proposed Tool Design Breakdown")
-                analysis = parse_analysis(result)
-                
-                tab1, tab2, tab3 = st.tabs(["Tools and Tech Stack", "Desired Activities", "Required Skills"])
-                with tab1:
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Tools and Tech Stack"]) or "No tools identified")
-                with tab2:
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Desired Activities"]) or "No activities identified")
-                with tab3:
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Required Skills"]) or "No skills identified")
+            with st.spinner("Processing job description..."):
+                # Store results in session state to share across tabs
+                st.session_state.breakdown_result = process_job_description(api_key, job_description, detailed_breakdown=True)
+                st.session_state.tool_design_result = process_job_description(api_key, job_description, detailed_breakdown=False)
+                st.success("Job description processed successfully!")
 
-                # Generate and display workflow code
-                workflow_code = generate_workflow_code(analysis)
-                st.subheader("Generated Daily Workflow Code")
+    # Tabs for displaying results
+    if "breakdown_result" in st.session_state and "tool_design_result" in st.session_state:
+        tab1, tab2, tab3, tab4 = st.tabs(["Tools and Tech Stack", "Desired Activities", "Required Skills", "Proposed Tool Design"])
+        
+        # Breakdown tabs
+        analysis = parse_analysis(st.session_state.breakdown_result)
+        
+        with tab1:
+            st.markdown("\n".join(f"- {item}" for item in analysis["Tools and Tech Stack"]) or "No tools identified")
+        with tab2:
+            st.markdown("\n".join(f"- {item}" for item in analysis["Desired Activities"]) or "No activities identified")
+        with tab3:
+            st.markdown("\n".join(f"- {item}" for item in analysis["Required Skills"]) or "No skills identified")
+        
+        # Proposed Tool Design tab (from techstacks2toolsv1.py)
+        with tab4:
+            st.subheader("Proposed Tool Design")
+            st.write(st.session_state.tool_design_result)
+            
+            # Download Proposed Tool Design
+            st.download_button(
+                label="Download Proposed Tool Design",
+                data=st.session_state.tool_design_result,
+                file_name="proposed_tool_design.txt",
+                mime="text/plain"
+            )
+            
+            # Generate and download daily_workflow.py
+            workflow_code = generate_workflow_code(analysis)
+            if st.button("Generate Daily Workflow"):
                 st.code(workflow_code, language="python")
-                
-                # Download options
                 st.download_button(
-                    label="Download Breakdown",
-                    data=result,
-                    file_name="tool_design_breakdown.txt",
-                    mime="text/plain"
-                )
-                st.download_button(
-                    label="Download Workflow Code",
+                    label="Download Daily Workflow Code",
                     data=workflow_code,
                     file_name="daily_workflow.py",
                     mime="text/plain"
