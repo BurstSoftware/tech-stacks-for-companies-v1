@@ -9,11 +9,11 @@ def process_job_description(api_key, job_description):
     payload = {
         "contents": [{
             "parts": [{
-                "text": f"""Analyze this job description and provide a detailed breakdown in the following structured format:
+                "text": """Analyze this job description and provide a detailed breakdown in the following structured format:
                 - Tools and Tech Stack: [list specific tools/tech mentioned in the job description]
                 - Desired Activities: [list specific activities the employee would perform]
                 - Required Skills: [list specific skills required for the role]
-                Job Description: {job_description}"""
+                Job Description: """ + job_description
             }]
         }]
     }
@@ -55,9 +55,15 @@ def generate_workflow_code(analysis):
     if not workflow_steps:
         workflow_steps = ["General Task"]  # Fallback if no activities specified
 
+    # Generate skills markdown content without backslashes in f-string
+    skills_list = "\n".join(f"- {skill}" for skill in skills if skill) if skills else "No skills identified"
+    skills_markdown = f"""st.markdown('''
+{skills_list}
+''')"""
+
     # Generate main workflow code
-    main_code = f"""# daily_workflow.py
-{'\n'.join(imports)}
+    main_code = """# daily_workflow.py
+import streamlit as st
 
 def main():
     st.set_page_config(page_title="Daily Workflow", layout="wide")
@@ -65,11 +71,11 @@ def main():
     st.subheader("Custom Workflow Based on Job Description")
 
     # Available tools from job description
-    TOOLS = {json.dumps(tools) if tools else '[]'}
+    TOOLS = """ + json.dumps(tools if tools else []) + """
 
     # Sidebar for navigation
     st.sidebar.title("Workflow Steps")
-    step = st.sidebar.radio("Select Activity", {json.dumps(workflow_steps)})
+    step = st.sidebar.radio("Select Activity", """ + json.dumps(workflow_steps) + """)
 
     # Dynamic content based on selected step
 """
@@ -100,9 +106,7 @@ def main():
     # Display skills reference
     with st.expander("Required Skills"):
         st.write("Skills required for this role:")
-        st.markdown('''{'''
-            + "\\n".join(f"- {skill}" for skill in ''' + json.dumps(skills) + ''' if skill)
-            + '''}''')
+        """ + skills_markdown + """
 
 if __name__ == "__main__":
     main()
