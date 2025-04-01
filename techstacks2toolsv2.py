@@ -1,4 +1,4 @@
-# techstacks2toolsv1.py
+# techstacks2toolsv2.py
 import streamlit as st
 import requests
 import json
@@ -13,11 +13,11 @@ def process_job_description(api_key, job_description):
     payload = {
         "contents": [{
             "parts": [{
-                "text": f"""Analyze this job description and provide a detailed Streamlit tool design:
+                "text": """Analyze this job description and provide a detailed Streamlit tool design:
                 - Required features
                 - Suggested UI components
                 - Proposed functionality
-                Job Description: {job_description}"""
+                Job Description: """ + job_description
             }]
         }]
     }
@@ -34,7 +34,10 @@ def process_job_description(api_key, job_description):
         return f"Error calling API: {str(e)}"
 
 def generate_reportlab_code(tool_design):
-    return f"""from reportlab.lib.pagesizes import letter
+    # Escape the content separately to avoid f-string backslash issues
+    escaped_content = tool_design.replace('"', '\\"').replace('\n', '\\n')
+    
+    return """from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 
@@ -48,7 +51,7 @@ def create_pdf(output_filename="tool_design.pdf"):
     story.append(Spacer(1, 12))
     
     # Content
-    content = \"\"\"{tool_design.replace('"', '\\"')}\"\"\"
+    content = "{}"
     for paragraph in content.split('\\n\\n'):
         story.append(Paragraph(paragraph, styles['BodyText']))
         story.append(Spacer(1, 12))
@@ -57,7 +60,7 @@ def create_pdf(output_filename="tool_design.pdf"):
 
 if __name__ == "__main__":
     create_pdf()
-"""
+""".format(escaped_content)
 
 def main():
     st.set_page_config(page_title="TechStack2Tools", layout="wide")
