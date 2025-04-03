@@ -12,10 +12,15 @@ with st.sidebar:
     page = st.radio("Navigation", ["Guide"])
     # Current date in sidebar
     st.markdown(f"**Current Date**: {datetime.now().strftime('%B %d, %Y')}")
-    # Tech stack in sidebar
+    # Tech stack related to Skills Required
     st.markdown("**Tech Stack**:")
-    st.markdown("- Streamlit")
-    st.markdown("- datetime")
+    st.markdown("- Snowflake")
+    st.markdown("- Databricks")
+    st.markdown("- dbt")
+    st.markdown("- AWS/Azure/GCP")
+    st.markdown("- SQL")
+    st.markdown("- Python")
+    st.markdown("- Git")
 
 # Main content
 if page == "Guide":
