@@ -34,13 +34,24 @@ def parse_analysis(result):
         "Required Skills": []
     }
     current_section = None
+    
+    # If result is an error message, return empty sections with the error
+    if result.startswith("Error:"):
+        return sections, result
+    
+    # Split lines and parse
     for line in result.split('\n'):
         line = line.strip()
         if line in sections:
             current_section = line
         elif current_section and line.startswith('-') and line[1:].strip():
             sections[current_section].append(line[1:].strip())
-    return sections
+    
+    # If no items were parsed, assume the response might be unstructured
+    if not any(sections.values()):
+        return sections, "Warning: Could not parse API response into structured format"
+    
+    return sections, None
 
 def main():
     st.set_page_config(page_title="Job Description Analyzer", layout="wide")
@@ -70,12 +81,18 @@ def main():
                 st.session_state.breakdown_result = process_job_description(api_key, job_description)
                 st.success("Job description processed successfully!")
 
-    # Tabs for displaying results
+    # Display raw result for debugging
     if "breakdown_result" in st.session_state:
-        tab1, tab2, tab3 = st.tabs(["Tools and Tech Stack", "Desired Activities", "Required Skills"])
-        
+        with st.expander("Raw API Response (Debug)", expanded=False):
+            st.text(st.session_state.breakdown_result)
+
         # Parse and display breakdown
-        analysis = parse_analysis(st.session_state.breakdown_result)
+        analysis, error_message = parse_analysis(st.session_state.breakdown_result)
+        
+        if error_message:
+            st.warning(error_message)
+        
+        tab1, tab2, tab3 = st.tabs(["Tools and Tech Stack", "Desired Activities", "Required Skills"])
         
         with tab1:
             st.markdown("\n".join(f"- {item}" for item in analysis["Tools and Tech Stack"]) or "No tools identified")
