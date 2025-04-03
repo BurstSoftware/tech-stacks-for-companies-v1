@@ -6,45 +6,41 @@ from collections import defaultdict
 # Set page config as the first Streamlit command
 st.set_page_config(page_title="Job Description Analyzer", layout="wide")
 
-# Custom CSS for a clean, beautiful look with hierarchical formatting
+# Custom CSS for minimal, hierarchical formatting
 st.markdown("""
     <style>
     .main {
         background-color: #f9f9f9;
-        padding: 40px;
-        max-width: 1200px;
+        padding: 30px;
+        max-width: 1000px;
         margin: 0 auto;
     }
     .header-title {
-        font-size: 36px;
+        font-size: 32px;
         font-weight: 700;
         color: #1a3c34;
-        margin-bottom: 10px;
         text-align: center;
+        margin-bottom: 20px;
     }
     .header-subtitle {
-        font-size: 20px;
+        font-size: 18px;
         color: #5e6e66;
-        margin-bottom: 40px;
         text-align: center;
+        margin-bottom: 30px;
     }
     .input-container {
         background-color: #ffffff;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.05);
-        margin-bottom: 40px;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
     }
     .section-container {
         background-color: #ffffff;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.05);
-        margin-bottom: 30px;
-        transition: transform 0.2s;
-    }
-    .section-container:hover {
-        transform: translateY(-5px);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
     }
     .section-title {
         font-size: 22px;
@@ -54,24 +50,27 @@ st.markdown("""
     }
     .main-point {
         font-size: 18px;
+        font-style: italic;
         color: #34495e;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .sub-detail {
         font-size: 16px;
         color: #34495e;
         margin-left: 20px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
+    }
+    .sub-detail u {
+        text-decoration: underline;
     }
     .stButton>button {
         background-color: #2ecc71;
         color: white;
-        border-radius: 8px;
-        padding: 12px 30px;
+        border-radius: 6px;
+        padding: 10px 20px;
         font-weight: 600;
         font-size: 16px;
         border: none;
-        transition: background-color 0.3s;
     }
     .stButton>button:hover {
         background-color: #27ae60;
@@ -84,21 +83,21 @@ st.markdown("""
     .stTextInput>div>input, .stTextArea>div>textarea {
         border: 1px solid #e0e0e0;
         border-radius: 6px;
-        padding: 12px;
+        padding: 10px;
         background-color: #f9f9f9;
     }
     .stSuccess {
         background-color: #e8f5e9;
         color: #2e7d32;
-        border-radius: 8px;
-        padding: 12px;
+        border-radius: 6px;
+        padding: 10px;
         margin-top: 10px;
     }
     .stError {
         background-color: #ffebee;
         color: #c62828;
-        border-radius: 8px;
-        padding: 12px;
+        border-radius: 6px;
+        padding: 10px;
         margin-top: 10px;
     }
     </style>
@@ -188,7 +187,7 @@ def main():
     with st.container():
         # Header
         st.markdown("<h1 class='header-title'>Job Description Analyzer</h1>", unsafe_allow_html=True)
-        st.markdown("<div class='header-subtitle'>Unlock Insights from Job Descriptions with Ease</div>", unsafe_allow_html=True)
+        st.markdown("<div class='header-subtitle'>Unlock Insights from Job Descriptions</div>", unsafe_allow_html=True)
 
         # Input Section
         with st.container():
@@ -225,14 +224,14 @@ def main():
             if error_message:
                 st.error(error_message)
             else:
-                st.markdown("<h2 class='header-title'>Your Analysis</h2>", unsafe_allow_html=True)
+                st.markdown("<h1 class='header-title'>Your Analysis</h1>", unsafe_allow_html=True)
                 for section in ["Key Tasks and Responsibilities", "Skills Required", "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
                     with st.container():
-                        st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='section-container'><div class='section-title'><b>{section}</b></div>", unsafe_allow_html=True)
                         content_lines = analysis[section] if analysis[section] else ["No details identified"]
                         for i, line in enumerate(content_lines):
                             if i == 0:
-                                st.markdown(f"<div class='main-point'>{line}</div>", unsafe_allow_html=True)
+                                st.markdown(f"<div class='main-point'><i>{line}</i></div>", unsafe_allow_html=True)
                             else:
                                 st.markdown(f"<div class='sub-detail'>{line}</div>", unsafe_allow_html=True)
                         st.markdown("</div>", unsafe_allow_html=True)
