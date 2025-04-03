@@ -2,7 +2,10 @@ import streamlit as st
 import requests
 import json
 
-# Custom CSS for a professional look
+# Set page config as the first Streamlit command
+st.set_page_config(page_title="Job Description Analyzer", layout="wide")
+
+# Custom CSS for a professional look (must come after set_page_config)
 st.markdown("""
     <style>
     .main {
@@ -113,8 +116,6 @@ def parse_analysis(result):
     return sections, None
 
 def main():
-    st.set_page_config(page_title="Job Description Analyzer", layout="wide")
-    
     # Header
     st.title("Job Description Analyzer")
     st.subheader("Transform Job Descriptions into Actionable Insights")
