@@ -48,19 +48,19 @@ st.markdown("""
         color: #1a3c34;
         margin-bottom: 15px;
     }
-    .main-point {
+    .main-category {
         font-size: 18px;
         font-style: italic;
         color: #34495e;
         margin-bottom: 10px;
     }
-    .sub-detail {
+    .detail {
         font-size: 16px;
         color: #34495e;
         margin-left: 20px;
         margin-bottom: 8px;
     }
-    .sub-detail u {
+    .detail u {
         text-decoration: underline;
     }
     .stButton>button {
@@ -164,18 +164,12 @@ def parse_response(response):
             elif "implementation" in lower_line or "notes" in lower_line:
                 current_section = "Implementation Notes"
             sections[current_section].append(line.lstrip("12345.").strip())
-        elif current_section:
-            for section, keywords in section_keywords.items():
-                if any(keyword in lower_line for keyword in keywords) and section != current_section:
-                    current_section = section
-                    break
+        elif current_section and (line.startswith("**") or any(kw in lower_line for kw in ["governance", "change", "security", "collaboration", "monitoring", "automation"])):
+            # Treat bolded lines or specific keywords as new categories
             sections[current_section].append(line)
-        else:
-            for section, keywords in section_keywords.items():
-                if any(keyword in lower_line for keyword in keywords):
-                    current_section = section
-                    sections[current_section].append(line)
-                    break
+            current_section = None  # Reset to avoid mixing with previous section
+        elif current_section:
+            sections[current_section].append(line)
     
     if not any(sections.values()):
         return sections, "Error: Could not extract meaningful sections from the response"
@@ -230,10 +224,13 @@ def main():
                         st.markdown(f"<div class='section-container'><div class='section-title'><b>{section}</b></div>", unsafe_allow_html=True)
                         content_lines = analysis[section] if analysis[section] else ["No details identified"]
                         for i, line in enumerate(content_lines):
-                            if i == 0:
-                                st.markdown(f"<div class='main-point'><i>{line}</i></div>", unsafe_allow_html=True)
+                            if i == 0 or "**" in line:
+                                # Treat the first line or bolded lines as main categories
+                                category = line.replace("**", "").strip()
+                                st.markdown(f"<div class='main-category'><i>{category}</i></div>", unsafe_allow_html=True)
                             else:
-                                st.markdown(f"<div class='sub-detail'>{line}</div>", unsafe_allow_html=True)
+                                # Treat subsequent lines as details
+                                st.markdown(f"<div class='detail'>{line}</div>", unsafe_allow_html=True)
                         st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
