@@ -2,7 +2,10 @@
 streamlit>=1.31.0
 requests>=2.31.0
 reportlab>=4.0.9
+graphviz>=0.20.1  # Ensure this line is present
+
 # json is part of Python standard library, no need to install separately
+# datetime is part of Python standard library, no need to install separately
 
 # Commented out requirements for future use
 # pandas>=2.2.0
