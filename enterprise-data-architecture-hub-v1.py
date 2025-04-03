@@ -1,72 +1,75 @@
 import streamlit as st
 from datetime import datetime
 
-# Set page configuration to wide layout
+# Set wide layout
 st.set_page_config(layout="wide")
 
 # Sidebar setup
 st.sidebar.title("Enterprise Data Architecture Hub")
-st.sidebar.write("A centralized guide for data architects to manage strategy, governance, and modeling.")
+st.sidebar.markdown("A centralized tool for data strategy, governance, and modeling across enterprise platforms.")
+
+# Current date in sidebar
+st.sidebar.markdown(f"**Current Date:** {datetime.now().strftime('%B %d, %Y')}")
 
 # Sidebar navigation
-page = st.sidebar.radio("Navigate", ["Guide"])
+st.sidebar.markdown("### Navigation")
+page = st.sidebar.radio("Go to", ["Guide"])
 
-# Sidebar current date
-current_date = datetime.now().strftime("%B %d, %Y")
-st.sidebar.write(f"**Current Date:** {current_date}")
+# Tech Stack & Resources in sidebar
+st.sidebar.markdown("### Tech Stack & Resources")
+st.sidebar.markdown("""
+- Streamlit ([https://docs.streamlit.io](https://docs.streamlit.io))
+- Python ([https://docs.python.org/3/](https://docs.python.org/3/))
+- SQLAlchemy ([https://docs.sqlalchemy.org](https://docs.sqlalchemy.org))
+- PostgreSQL ([https://www.postgresql.org/docs/](https://www.postgresql.org/docs/))
+- Plotly ([https://plotly.com/python/](https://plotly.com/python/))
+""")
 
-# Sidebar tech stack
-st.sidebar.write("**Tech Stack:**")
-st.sidebar.write("- Python: [Learn More](https://docs.python.org/3/)")
-st.sidebar.write("- SQL: [Learn More](https://www.w3schools.com/sql/)")
-st.sidebar.write("- Cloud Platforms (AWS/Azure/GCP): [Learn More](https://aws.amazon.com/what-is-cloud-computing/)")
-st.sidebar.write("- Streamlit: [Learn More](https://docs.streamlit.io/)")
-st.sidebar.write("- Data Modeling Tools: [Learn More](https://www.erwin.com/data-modeling/)")
-
-# Main content: Guide section
+# Main content - Guide section
 if page == "Guide":
     st.title("Enterprise Data Architecture Hub - Guide")
-    
+
     # Key Tasks and Responsibilities
-    st.header("1. Key Tasks and Responsibilities")
+    st.header("Key Tasks and Responsibilities")
     st.markdown("""
-    - **Develop Data Strategy**: Define long-term data architecture goals. [Resource](https://www.dataversity.net/data-strategy/)
-    - **Data Governance**: Establish policies for data quality and security. [Resource](https://www.collibra.com/data-governance/)
-    - **Data Modeling**: Create and manage conceptual, logical, and physical data models. [Resource](https://www.datamodel.com/)
-    - **Cloud Integration**: Optimize data systems for cloud platforms. [Resource](https://aws.amazon.com/cloud-data-management/)
-    - **Metadata Management**: Document and classify data assets. [Resource](https://www.alation.com/what-is-metadata-management/)
+    - **Discover and document data assets**: Manage data asset catalog and metadata ([Streamlit Data Display](https://docs.streamlit.io/library/api-reference/data)).
+    - **Develop data models**: Create and manage conceptual, logical, and physical data models ([SQLAlchemy Models](https://docs.sqlalchemy.org/en/20/orm/)).
+    - **Define architecture standards**: Establish data governance and policies ([Data Governance Basics](https://www.dataversity.net/data-governance-basics/)).
+    - **Plan technology roadmap**: Assess and integrate data platforms ([Enterprise Architecture Guide](https://www.gartner.com/en/information-technology/insights/enterprise-architecture)).
+    - **Ensure data security**: Implement governance and access controls ([Python Security Best Practices](https://docs.python.org/3/library/security.html)).
     """)
-    
+
     # Skills Required
-    st.header("2. Skills Required")
+    st.header("Skills Required")
     st.markdown("""
-    - **Data Architecture**: Expertise in designing scalable data systems. [Resource](https://www.coursera.org/learn/data-architecture)
-    - **SQL Proficiency**: Advanced querying and database management. [Resource](https://www.sqlcourse.com/)
-    - **Cloud Knowledge**: Familiarity with AWS, Azure, or GCP. [Resource](https://cloud.google.com/learn)
-    - **Data Governance**: Understanding of compliance and policy frameworks. [Resource](https://www.isaca.org/resources/data-governance)
-    - **Communication**: Ability to collaborate with stakeholders. [Resource](https://www.linkedin.com/learning/business-communication/)
+    - **Data Modeling**: Proficiency in ER and UML modeling ([ERD Tutorial](https://www.lucidchart.com/pages/er-diagrams)).
+    - **Python Programming**: Backend logic and scripting ([Python Tutorial](https://docs.python.org/3/tutorial/)).
+    - **SQL/Database Management**: Querying and schema design ([PostgreSQL Docs](https://www.postgresql.org/docs/)).
+    - **Cloud Platforms**: Knowledge of AWS, Azure, or GCP ([AWS Data Services](https://aws.amazon.com/big-data/)).
+    - **Data Governance**: Understanding policies and compliance ([Data Governance Framework](https://www.collibra.com/data-governance-what-it-is/)).
     """)
-    
+
     # Tool Design Overview
-    st.header("3. Tool Design Overview")
-    st.markdown("""
-    The **Enterprise Data Architecture Hub** is a Streamlit-based tool designed to assist Enterprise Data Architects at a large bank. It provides a centralized guide for managing data strategy, governance, and modeling tasks. The tool is structured as a single-page application with a sidebar for navigation and a main 'Guide' section to outline key responsibilities, skills, and technical details.
-    """)
-    
+    st.header("Tool Design Overview")
+    design_input = st.text_area("Proposed Tool Design", height=200, value="")
+    if design_input:
+        st.markdown(design_input)
+    else:
+        st.markdown("Paste your Proposed Tool Design here to view it.")
+
     # Tech Stack Integration
-    st.header("4. Tech Stack Integration")
+    st.header("Tech Stack Integration")
     st.markdown("""
-    - **Python**: Core language for scripting and automation, integrates with Streamlit for UI. [Resource](https://realpython.com/python-streamlit/)
-    - **SQL**: Used for querying and managing relational databases, foundational for data modeling. [Resource](https://www.w3schools.com/sql/sql_intro.asp)
-    - **Cloud Platforms**: Enable scalable data storage and processing, integrated via APIs. [Resource](https://azure.microsoft.com/en-us/services/)
-    - **Streamlit**: Provides an interactive interface for data architects. [Resource](https://streamlit.io/gallery)
-    - **Data Modeling Tools**: Support creation of ER diagrams and schemas, often integrated with SQL outputs. [Resource](https://www.visual-paradigm.com/guide/data-modeling/)
+    - **Streamlit + Python**: Builds the UI and handles logic ([Streamlit with Python](https://docs.streamlit.io)).
+    - **SQLAlchemy + PostgreSQL**: Manages data models and metadata storage ([SQLAlchemy Integration](https://docs.sqlalchemy.org/en/20/orm/)).
+    - **Plotly**: Visualizes data models and lineage ([Plotly Python](https://plotly.com/python/)).
+    - **Authentication**: Integrates with OAuth2 or LDAP for security ([Python OAuth2](https://oauthlib.readthedocs.io/)).
     """)
-    
+
     # Implementation Notes
-    st.header("5. Implementation Notes")
+    st.header("Implementation Notes")
     st.markdown("""
-    - **Construction**: Built with basic Streamlit tools (`st.write`, `st.markdown`, `st.sidebar`) and `datetime` for date display. No additional libraries are used to keep it lightweight.
-    - **Potential Enhancements**: Add tabs for Data Asset Catalog, Data Modeling, and Governance (requires advanced Streamlit features like `st.tabs` in future iterations). Integrate with a database for dynamic data (requires libraries like SQLAlchemy). Enhance interactivity with user inputs (e.g., skill ratings) if imports are expanded.
-    - **Limitations**: Static content due to limited imports; links are hardcoded markdown URLs.
+    - **Construction**: Built with Streamlit for rapid UI development and Python for backend logic. Uses a simple layout with sidebar navigation.
+    - **Enhancements**: Add tabs for each core functionality (e.g., Data Asset Catalog, Data Modeling) using st.tabs when available in basic Streamlit. Integrate with a database for persistent storage and caching for performance ([Streamlit Caching](https://docs.streamlit.io/library/api-reference/performance)).
+    - **Future Steps**: Incorporate interactive visualizations and authentication for enterprise use.
     """)
