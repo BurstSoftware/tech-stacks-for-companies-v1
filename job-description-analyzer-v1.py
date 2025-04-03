@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import json
+from collections import defaultdict
 
 # Set page config as the first Streamlit command
 st.set_page_config(page_title="Job Description Analyzer", layout="wide")
@@ -13,13 +14,21 @@ st.markdown("""
         padding: 20px;
         border-radius: 10px;
     }
-    .stExpander {
+    .section-container {
         background-color: #ffffff;
         border: 1px solid #e0e0e0;
         border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .stExpander > div > div > div > p {
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    .section-content {
         font-size: 16px;
         color: #333333;
     }
@@ -50,12 +59,6 @@ st.markdown("""
         border: 1px solid #c62828;
         border-radius: 5px;
     }
-    .stWarning {
-        background-color: #fff3e0;
-        color: #ef6c00;
-        border: 1px solid #ef6c00;
-        border-radius: 5px;
-    }
     h1, h2 {
         color: #2c3e50;
     }
@@ -66,13 +69,12 @@ def process_job_description(api_key, job_description):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     
-    prompt = f"""Analyze this job description and return the response in this exact structured markdown format:
-    - Key Tasks and Responsibilities: [list key tasks and responsibilities here, e.g., Analyze data]
-    - Skills Required: [list skills required here, e.g., Programming]
-    - Tool Design Overview: [provide a brief overview of a tool design to support the role, e.g., A dashboard tool]
-    - Tech Stack Integration: [list how the tech stack integrates, e.g., Python with SQL databases]
-    - Implementation Notes: [list notes on implementation, e.g., Use APIs for data retrieval]
-    If no items are identified for a section, use an empty list [].
+    prompt = f"""Provide a detailed analysis of this job description, covering:
+    1. Key tasks and responsibilities
+    2. Skills required
+    3. A brief overview of a tool design to support the role
+    4. How the tech stack integrates
+    5. Notes on implementation
     Job Description: {job_description}"""
 
     payload = {
@@ -90,28 +92,59 @@ def process_job_description(api_key, job_description):
     except requests.exceptions.RequestException as e:
         return f"Error calling API: {str(e)}"
 
-def parse_analysis(result):
-    sections = {
-        "Key Tasks and Responsibilities": [],
-        "Skills Required": [],
-        "Tool Design Overview": [],
-        "Tech Stack Integration": [],
-        "Implementation Notes": []
-    }
+def parse_response(response):
+    sections = defaultdict(list)
+    lines = response.split('\n')
     current_section = None
     
-    if result.startswith("Error:"):
-        return sections, result
+    # Keywords to identify sections
+    section_keywords = {
+        "Key Tasks and Responsibilities": ["tasks", "responsibilities", "duties", "perform"],
+        "Skills Required": ["skills", "required", "qualifications", "abilities"],
+        "Tool Design Overview": ["tool", "design", "overview", "support"],
+        "Tech Stack Integration": ["tech", "stack", "integration", "integrates"],
+        "Implementation Notes": ["implementation", "notes", "how to", "approach"]
+    }
     
-    for line in result.split('\n'):
+    if response.startswith("Error:"):
+        return sections, response
+    
+    for line in lines:
         line = line.strip()
-        if line in sections:
-            current_section = line
-        elif current_section and line.startswith('-') and line[1:].strip():
-            sections[current_section].append(line[1:].strip())
+        if not line:
+            continue
+        
+        # Check for numbered sections (e.g., "1.", "2.") or keywords
+        lower_line = line.lower()
+        if any(lower_line.startswith(f"{i}.") for i in range(1, 6)):
+            if "tasks" in lower_line or "responsibilities" in lower_line:
+                current_section = "Key Tasks and Responsibilities"
+            elif "skills" in lower_line or "required" in lower_line:
+                current_section = "Skills Required"
+            elif "tool" in lower_line or "design" in lower_line:
+                current_section = "Tool Design Overview"
+            elif "tech" in lower_line or "stack" in lower_line or "integration" in lower_line:
+                current_section = "Tech Stack Integration"
+            elif "implementation" in lower_line or "notes" in lower_line:
+                current_section = "Implementation Notes"
+            sections[current_section].append(line.lstrip("12345.").strip())
+        elif current_section:
+            # Add to current section if it’s a continuation
+            for section, keywords in section_keywords.items():
+                if any(keyword in lower_line for keyword in keywords) and section != current_section:
+                    current_section = section
+                    break
+            sections[current_section].append(line)
+        else:
+            # Fallback: Look for keywords to start a section
+            for section, keywords in section_keywords.items():
+                if any(keyword in lower_line for keyword in keywords):
+                    current_section = section
+                    sections[current_section].append(line)
+                    break
     
     if not any(sections.values()):
-        return sections, "Warning: Could not parse API response into structured format"
+        return sections, "Warning: Could not extract meaningful sections from the response"
     
     return sections, None
 
@@ -147,28 +180,20 @@ def main():
                 st.session_state.breakdown_result = process_job_description(api_key, job_description)
                 st.success("Analysis completed successfully!")
 
-    # Results Section with Debugging
+    # Results Section
     if "breakdown_result" in st.session_state:
-        with st.expander("Raw API Response (Temporary Debug)", expanded=True):
-            st.text(st.session_state.breakdown_result)
-        
-        analysis, error_message = parse_analysis(st.session_state.breakdown_result)
+        analysis, error_message = parse_response(st.session_state.breakdown_result)
         
         if error_message:
-            st.warning(error_message)
+            st.error(error_message)
         else:
             st.markdown("### Analysis Results")
             with st.container():
-                with st.expander("Key Tasks and Responsibilities", expanded=True):
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Key Tasks and Responsibilities"]) or "No tasks identified")
-                with st.expander("Skills Required", expanded=True):
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Skills Required"]) or "No skills identified")
-                with st.expander("Tool Design Overview", expanded=True):
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Tool Design Overview"]) or "No overview provided")
-                with st.expander("Tech Stack Integration", expanded=True):
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Tech Stack Integration"]) or "No integration details provided")
-                with st.expander("Implementation Notes", expanded=True):
-                    st.markdown("\n".join(f"- {item}" for item in analysis["Implementation Notes"]) or "No notes provided")
+                for section in ["Key Tasks and Responsibilities", "Skills Required", "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
+                    st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'>", unsafe_allow_html=True)
+                    content = "\n".join(f"- {item}" for item in analysis[section]) or "No details identified"
+                    st.markdown(content)
+                    st.markdown("</div></div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
