@@ -5,7 +5,7 @@ import json
 # Set page config as the first Streamlit command
 st.set_page_config(page_title="Job Description Analyzer", layout="wide")
 
-# Custom CSS for a professional look (must come after set_page_config)
+# Custom CSS for a professional look
 st.markdown("""
     <style>
     .main {
@@ -147,8 +147,11 @@ def main():
                 st.session_state.breakdown_result = process_job_description(api_key, job_description)
                 st.success("Analysis completed successfully!")
 
-    # Results Section
+    # Results Section with Debugging
     if "breakdown_result" in st.session_state:
+        with st.expander("Raw API Response (Temporary Debug)", expanded=True):
+            st.text(st.session_state.breakdown_result)
+        
         analysis, error_message = parse_analysis(st.session_state.breakdown_result)
         
         if error_message:
