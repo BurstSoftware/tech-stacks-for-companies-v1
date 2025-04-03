@@ -7,9 +7,11 @@ def process_job_description(api_key, job_description):
     headers = {"Content-Type": "application/json"}
     
     prompt = f"""Analyze this job description and return the response in this exact structured markdown format:
-    - Tools and Tech Stack: [list tools/tech here, e.g., Python, SQL]
-    - Desired Activities: [list activities here, e.g., Analyze data]
-    - Required Skills: [list skills here, e.g., Programming]
+    - Key Tasks and Responsibilities: [list key tasks and responsibilities here, e.g., Analyze data]
+    - Skills Required: [list skills required here, e.g., Programming]
+    - Tool Design Overview: [provide a brief overview of a tool design to support the role, e.g., A dashboard tool]
+    - Tech Stack Integration: [list how the tech stack integrates, e.g., Python with SQL databases]
+    - Implementation Notes: [list notes on implementation, e.g., Use APIs for data retrieval]
     If no items are identified for a section, use an empty list [].
     Job Description: {job_description}"""
 
@@ -30,9 +32,11 @@ def process_job_description(api_key, job_description):
 
 def parse_analysis(result):
     sections = {
-        "Tools and Tech Stack": [],
-        "Desired Activities": [],
-        "Required Skills": []
+        "Key Tasks and Responsibilities": [],
+        "Skills Required": [],
+        "Tool Design Overview": [],
+        "Tech Stack Integration": [],
+        "Implementation Notes": []
     }
     current_section = None
     
@@ -85,6 +89,18 @@ def main():
         
         if error_message:
             st.warning(error_message)
+        else:
+            st.subheader("Analysis Results")
+            with st.expander("Key Tasks and Responsibilities", expanded=True):
+                st.markdown("\n".join(f"- {item}" for item in analysis["Key Tasks and Responsibilities"]) or "No tasks identified")
+            with st.expander("Skills Required", expanded=True):
+                st.markdown("\n".join(f"- {item}" for item in analysis["Skills Required"]) or "No skills identified")
+            with st.expander("Tool Design Overview", expanded=True):
+                st.markdown("\n".join(f"- {item}" for item in analysis["Tool Design Overview"]) or "No overview provided")
+            with st.expander("Tech Stack Integration", expanded=True):
+                st.markdown("\n".join(f"- {item}" for item in analysis["Tech Stack Integration"]) or "No integration details provided")
+            with st.expander("Implementation Notes", expanded=True):
+                st.markdown("\n".join(f"- {item}" for item in analysis["Implementation Notes"]) or "No notes provided")
 
 if __name__ == "__main__":
     main()
