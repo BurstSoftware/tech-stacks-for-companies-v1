@@ -134,6 +134,7 @@ def parse_response(response):
     sections = defaultdict(list)
     lines = response.split('\n')
     current_section = None
+    current_category = None
     
     section_keywords = {
         "Key Tasks and Responsibilities": ["tasks", "responsibilities", "duties", "perform"],
@@ -142,6 +143,8 @@ def parse_response(response):
         "Tech Stack Integration": ["tech", "stack", "integration", "integrates"],
         "Implementation Notes": ["implementation", "notes", "how to", "approach"]
     }
+    
+    category_keywords = ["governance", "change", "security", "collaboration", "monitoring", "automation", "strategy", "standards", "management"]
     
     if response.startswith("Error:"):
         return sections, response
@@ -152,6 +155,7 @@ def parse_response(response):
             continue
         
         lower_line = line.lower()
+        # Detect main sections using numbered list
         if any(lower_line.startswith(f"{i}.") for i in range(1, 6)):
             if "tasks" in lower_line or "responsibilities" in lower_line:
                 current_section = "Key Tasks and Responsibilities"
@@ -164,12 +168,16 @@ def parse_response(response):
             elif "implementation" in lower_line or "notes" in lower_line:
                 current_section = "Implementation Notes"
             sections[current_section].append(line.lstrip("12345.").strip())
-        elif current_section and (line.startswith("**") or any(kw in lower_line for kw in ["governance", "change", "security", "collaboration", "monitoring", "automation"])):
-            # Treat bolded lines or specific keywords as new categories
-            sections[current_section].append(line)
-            current_section = None  # Reset to avoid mixing with previous section
+            current_category = None
         elif current_section:
-            sections[current_section].append(line)
+            # Detect categories within sections (e.g., "Governance and Standards")
+            if line.startswith("**") or any(kw in lower_line for kw in category_keywords):
+                category = line.replace("**", "").replace(":", "").strip()
+                sections[current_section].append(f"category:{category}")
+                current_category = category
+            else:
+                # Add as a detail under the current section/category
+                sections[current_section].append(line)
     
     if not any(sections.values()):
         return sections, "Error: Could not extract meaningful sections from the response"
@@ -223,13 +231,11 @@ def main():
                     with st.container():
                         st.markdown(f"<div class='section-container'><div class='section-title'><b>{section}</b></div>", unsafe_allow_html=True)
                         content_lines = analysis[section] if analysis[section] else ["No details identified"]
-                        for i, line in enumerate(content_lines):
-                            if i == 0 or "**" in line:
-                                # Treat the first line or bolded lines as main categories
-                                category = line.replace("**", "").strip()
+                        for line in content_lines:
+                            if line.startswith("category:"):
+                                category = line.replace("category:", "").strip()
                                 st.markdown(f"<div class='main-category'><i>{category}</i></div>", unsafe_allow_html=True)
                             else:
-                                # Treat subsequent lines as details
                                 st.markdown(f"<div class='detail'>{line}</div>", unsafe_allow_html=True)
                         st.markdown("</div>", unsafe_allow_html=True)
 
