@@ -35,11 +35,9 @@ def parse_analysis(result):
     }
     current_section = None
     
-    # If result is an error message, return empty sections with the error
     if result.startswith("Error:"):
         return sections, result
     
-    # Split lines and parse
     for line in result.split('\n'):
         line = line.strip()
         if line in sections:
@@ -47,7 +45,6 @@ def parse_analysis(result):
         elif current_section and line.startswith('-') and line[1:].strip():
             sections[current_section].append(line[1:].strip())
     
-    # If no items were parsed, assume the response might be unstructured
     if not any(sections.values()):
         return sections, "Warning: Could not parse API response into structured format"
     
@@ -58,7 +55,6 @@ def main():
     st.title("Job Description Analyzer")
     st.subheader("Break Down Any Job Description")
 
-    # Input section
     with st.expander("Input", expanded=True):
         api_key = st.text_input("Google AI Studio API Key", type="password", help="Enter your API key")
         job_input_method = st.radio("How would you like to provide the job description?", 
@@ -72,7 +68,6 @@ def main():
             if uploaded_file:
                 job_description = uploaded_file.read().decode("utf-8")
 
-    # Process button
     if st.button("Process Job Description"):
         if not api_key or not job_description:
             st.error("Please provide both API key and job description")
@@ -81,12 +76,7 @@ def main():
                 st.session_state.breakdown_result = process_job_description(api_key, job_description)
                 st.success("Job description processed successfully!")
 
-    # Display raw result for debugging
     if "breakdown_result" in st.session_state:
-        with st.expander("Raw API Response (Debug)", expanded=False):
-            st.text(st.session_state.breakdown_result)
-
-        # Parse and display breakdown
         analysis, error_message = parse_analysis(st.session_state.breakdown_result)
         
         if error_message:
