@@ -6,70 +6,87 @@ st.set_page_config(layout="wide")
 
 # Sidebar setup
 st.sidebar.title("Enterprise Data Architecture Hub")
-st.sidebar.markdown("A centralized tool for data strategy, governance, and modeling across enterprise platforms.")
+st.sidebar.markdown("[Insert Sidebar Description]: A tool to centralize data strategy, governance, and modeling for enterprise data architects at a large bank.")
 
 # Current date in sidebar
 st.sidebar.markdown(f"**Current Date:** {datetime.now().strftime('%B %d, %Y')}")
 
-# Sidebar navigation
-st.sidebar.markdown("### Navigation")
-page = st.sidebar.radio("Go to", ["Guide"])
-
-# Tech Stack & Resources in sidebar
+# Sidebar Tech Stack & Resources
 st.sidebar.markdown("### Tech Stack & Resources")
 st.sidebar.markdown("""
-- Streamlit ([https://docs.streamlit.io](https://docs.streamlit.io))
-- Python ([https://docs.python.org/3/](https://docs.python.org/3/))
-- SQLAlchemy ([https://docs.sqlalchemy.org](https://docs.sqlalchemy.org))
-- PostgreSQL ([https://www.postgresql.org/docs/](https://www.postgresql.org/docs/))
-- Plotly ([https://plotly.com/python/](https://plotly.com/python/))
+- Streamlit ([https://docs.streamlit.io/](https://docs.streamlit.io/))  
+- Python ([https://docs.python.org/3/tutorial/](https://docs.python.org/3/tutorial/))  
+- SQLAlchemy ([https://docs.sqlalchemy.org/en/20/](https://docs.sqlalchemy.org/en/20/))  
+- PostgreSQL ([https://www.postgresql.org/docs/](https://www.postgresql.org/docs/))  
+- Plotly ([https://plotly.com/python/](https://plotly.com/python/))  
 """)
 
-# Main content - Guide section
-if page == "Guide":
-    st.title("Enterprise Data Architecture Hub - Guide")
+# Navigation (only Guide section)
+st.sidebar.markdown("### Navigation")
+st.sidebar.markdown("- Guide")
 
-    # Key Tasks and Responsibilities
-    st.header("Key Tasks and Responsibilities")
-    st.markdown("""
-    - **Discover and document data assets**: Manage data asset catalog and metadata ([Streamlit Data Display](https://docs.streamlit.io/library/api-reference/data)).
-    - **Develop data models**: Create and manage conceptual, logical, and physical data models ([SQLAlchemy Models](https://docs.sqlalchemy.org/en/20/orm/)).
-    - **Define architecture standards**: Establish data governance and policies ([Data Governance Basics](https://www.dataversity.net/data-governance-basics/)).
-    - **Plan technology roadmap**: Assess and integrate data platforms ([Enterprise Architecture Guide](https://www.gartner.com/en/information-technology/insights/enterprise-architecture)).
-    - **Ensure data security**: Implement governance and access controls ([Python Security Best Practices](https://docs.python.org/3/library/security.html)).
-    """)
+# Main Guide Section
+st.title("Enterprise Data Architecture Hub - Guide")
 
-    # Skills Required
-    st.header("Skills Required")
-    st.markdown("""
-    - **Data Modeling**: Proficiency in ER and UML modeling ([ERD Tutorial](https://www.lucidchart.com/pages/er-diagrams)).
-    - **Python Programming**: Backend logic and scripting ([Python Tutorial](https://docs.python.org/3/tutorial/)).
-    - **SQL/Database Management**: Querying and schema design ([PostgreSQL Docs](https://www.postgresql.org/docs/)).
-    - **Cloud Platforms**: Knowledge of AWS, Azure, or GCP ([AWS Data Services](https://aws.amazon.com/big-data/)).
-    - **Data Governance**: Understanding policies and compliance ([Data Governance Framework](https://www.collibra.com/data-governance-what-it-is/)).
-    """)
+# Key Tasks and Responsibilities
+st.header("Key Tasks and Responsibilities")
+st.markdown("""
+- **Discover, Document, and Classify Data Assets**: Maintain a catalog of data assets across platforms.  
+  Resource: [Data Catalog Basics](https://www.datacamp.com/tutorial/data-catalogs)  
+- **Develop Data Blueprints and Models**: Create conceptual, logical, and physical data models.  
+  Resource: [Data Modeling Tutorial](https://www.guru99.com/data-modelling.html)  
+- **Define Architecture Standards and Policies**: Establish guidelines for data governance and consistency.  
+  Resource: [Data Governance Guide](https://www.dataversity.net/data-governance-best-practices/)  
+- **Manage Technology Landscape**: Plan and roadmap data platforms and tools.  
+  Resource: [Enterprise Architecture Basics](https://www.cio.com/article/2439128/enterprise-architecture-basics.html)  
+- **Ensure Data Governance and Security**: Implement rules and controls for data access and lifecycle.  
+  Resource: [Data Security Best Practices](https://www.imperva.com/learn/data-security/)  
+- **Optimize Cloud Data Management**: Enhance performance and cost-effectiveness in cloud environments.  
+  Resource: [Cloud Data Management](https://www.talend.com/resources/cloud-data-management/)
+""")
 
-    # Tool Design Overview
-    st.header("Tool Design Overview")
-    design_input = st.text_area("Proposed Tool Design", height=200, value="")
-    if design_input:
-        st.markdown(design_input)
-    else:
-        st.markdown("Paste your Proposed Tool Design here to view it.")
+# Skills Required
+st.header("Skills Required")
+st.markdown("""
+- **Data Modeling**: Proficiency in designing data structures.  
+  Resource: [Learn Data Modeling](https://www.datacamp.com/courses/data-modeling)  
+- **Data Governance**: Knowledge of policies and compliance.  
+  Resource: [Data Governance Training](https://www.edx.org/learn/data-governance)  
+- **Cloud Platforms**: Experience with AWS, Azure, or GCP.  
+  Resource: [Cloud Computing Basics](https://aws.amazon.com/training/)  
+- **Python Programming**: Backend logic and data manipulation skills.  
+  Resource: [Python Tutorial](https://www.w3schools.com/python/)  
+- **SQL and Databases**: Querying and managing relational databases.  
+  Resource: [SQL Basics](https://www.khanacademy.org/computing/computer-programming/sql)
+""")
 
-    # Tech Stack Integration
-    st.header("Tech Stack Integration")
-    st.markdown("""
-    - **Streamlit + Python**: Builds the UI and handles logic ([Streamlit with Python](https://docs.streamlit.io)).
-    - **SQLAlchemy + PostgreSQL**: Manages data models and metadata storage ([SQLAlchemy Integration](https://docs.sqlalchemy.org/en/20/orm/)).
-    - **Plotly**: Visualizes data models and lineage ([Plotly Python](https://plotly.com/python/)).
-    - **Authentication**: Integrates with OAuth2 or LDAP for security ([Python OAuth2](https://oauthlib.readthedocs.io/)).
-    """)
+# Tool Design Overview
+st.header("Tool Design Overview")
+design_input = st.text_area("Proposed Tool Design", height=200, value="")
+if design_input:
+    st.markdown(design_input)
+else:
+    st.markdown("Paste your Proposed Tool Design here to view it.")
 
-    # Implementation Notes
-    st.header("Implementation Notes")
-    st.markdown("""
-    - **Construction**: Built with Streamlit for rapid UI development and Python for backend logic. Uses a simple layout with sidebar navigation.
-    - **Enhancements**: Add tabs for each core functionality (e.g., Data Asset Catalog, Data Modeling) using st.tabs when available in basic Streamlit. Integrate with a database for persistent storage and caching for performance ([Streamlit Caching](https://docs.streamlit.io/library/api-reference/performance)).
-    - **Future Steps**: Incorporate interactive visualizations and authentication for enterprise use.
-    """)
+st.markdown("""
+**Purpose**: Centralize data strategy, governance, and modeling for enterprise data architects, supporting tasks like metadata management, data modeling, and cloud optimization.
+""")
+
+# Tech Stack Integration
+st.header("Tech Stack Integration")
+st.markdown("""
+- **Streamlit + Python**: Streamlit provides the UI, while Python handles backend logic and data processing.  
+  Resource: [Streamlit with Python](https://docs.streamlit.io/library/get-started)  
+- **SQLAlchemy + PostgreSQL**: SQLAlchemy integrates with PostgreSQL for structured data storage and querying.  
+  Resource: [SQLAlchemy with PostgreSQL](https://docs.sqlalchemy.org/en/20/orm/)  
+- **Plotly**: Enhances visualization of data models and lineage diagrams.  
+  Resource: [Plotly Integration](https://plotly.com/python/getting-started/)
+""")
+
+# Implementation Notes
+st.header("Implementation Notes")
+st.markdown("""
+- **Construction**: Built with Streamlit for a simple, interactive UI and Python for logic. Uses static links due to limited imports.  
+- **Enhancements**: Add authentication, caching, and dynamic data connections with additional libraries like SQLAlchemy or OAuth2.  
+- **Limitations**: Current version lacks real-time data fetching or advanced visuals due to import constraints.
+""")
