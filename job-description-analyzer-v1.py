@@ -218,6 +218,14 @@ def main():
                 st.error(error_message)
             else:
                 st.markdown("### Your Analysis")
+                # Add Business Category and Type
+                with st.container():
+                    st.markdown("<div class='section-container'><div class='section-title'>Business Context</div><div class='section-content'>", unsafe_allow_html=True)
+                    st.markdown("- **Category**: Technology / HR Tech")
+                    st.markdown("- **Type**: Software as a Service (SaaS)")
+                    st.markdown("</div></div>", unsafe_allow_html=True)
+                
+                # Display the rest of the analysis
                 for section in ["Key Tasks and Responsibilities", "Skills Required", "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
                     with st.container():
                         st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'>", unsafe_allow_html=True)
