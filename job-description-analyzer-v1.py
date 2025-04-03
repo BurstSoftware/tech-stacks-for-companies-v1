@@ -6,7 +6,7 @@ from collections import defaultdict
 # Set page config as the first Streamlit command
 st.set_page_config(page_title="Job Description Analyzer", layout="wide")
 
-# Custom CSS for a beautiful, clean look
+# Custom CSS for a clean, beautiful look with hierarchical formatting
 st.markdown("""
     <style>
     .main {
@@ -51,33 +51,17 @@ st.markdown("""
         font-weight: 600;
         color: #1a3c34;
         margin-bottom: 15px;
-        display: flex;
-        align-items: center;
     }
-    .section-title::before {
-        content: "•";
-        color: #2ecc71;
-        font-size: 24px;
-        margin-right: 10px;
+    .main-point {
+        font-size: 18px;
+        color: #34495e;
+        margin-bottom: 8px;
     }
-    .section-content {
+    .sub-detail {
         font-size: 16px;
         color: #34495e;
-        line-height: 1.8;
-        margin-left: 10px; /* Offset to align with title bullet */
-    }
-    .section-content ul {
-        list-style-type: none; /* Remove default bullets */
-        padding-left: 0;
-    }
-    .section-content li {
-        margin-bottom: 10px;
-    }
-    .section-content li::before {
-        content: "•";
-        color: #2ecc71;
-        font-size: 16px;
-        margin-right: 10px;
+        margin-left: 20px;
+        margin-bottom: 6px;
     }
     .stButton>button {
         background-color: #2ecc71;
@@ -244,10 +228,14 @@ def main():
                 st.markdown("<h2 class='header-title'>Your Analysis</h2>", unsafe_allow_html=True)
                 for section in ["Key Tasks and Responsibilities", "Skills Required", "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
                     with st.container():
-                        st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'><ul>", unsafe_allow_html=True)
-                        content = "\n".join(f"<li>{item}</li>" for item in analysis[section]) if analysis[section] else "<li>No details identified</li>"
-                        st.markdown(content, unsafe_allow_html=True)
-                        st.markdown("</ul></div></div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div>", unsafe_allow_html=True)
+                        content_lines = analysis[section] if analysis[section] else ["No details identified"]
+                        for i, line in enumerate(content_lines):
+                            if i == 0:
+                                st.markdown(f"<div class='main-point'>{line}</div>", unsafe_allow_html=True)
+                            else:
+                                st.markdown(f"<div class='sub-detail'>{line}</div>", unsafe_allow_html=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
