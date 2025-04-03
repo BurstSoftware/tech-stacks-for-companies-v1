@@ -3,6 +3,11 @@ import graphviz
 import requests
 import json
 from datetime import datetime
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
+from reportlab.lib.styles import getSampleStyleSheet
+import csv
+import io
 
 # Simulated in-memory storage (replace with database like PostgreSQL or Neo4j in production)
 state = {
@@ -17,7 +22,7 @@ state = {
 API_KEY = "YOUR_GEMINI_API_KEY_HERE"  # Replace with your actual API key or use st.secrets
 API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-# Helper function for AI suggestions (daily optimization companion)
+# Helper function for AI suggestions
 def get_ai_suggestion(prompt):
     headers = {"Content-Type": "application/json"}
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
@@ -28,7 +33,7 @@ def get_ai_suggestion(prompt):
     except Exception as e:
         return f"Error with API call: {str(e)}"
 
-# Data Model Display Function (used daily for visualization)
+# Data Model Display Function
 def display_data_model(dot_code, title="Data Model"):
     try:
         graph = graphviz.Source(dot_code)
@@ -36,7 +41,7 @@ def display_data_model(dot_code, title="Data Model"):
     except Exception as e:
         st.error(f"Error rendering model: {str(e)}")
 
-# Simulated Tech Stack Integrations (placeholders for daily use)
+# Simulated Tech Stack Integrations
 def check_cloud_status(platform="Snowflake"):
     return f"{platform} is operational as of {datetime.now().strftime('%H:%M')}"
 
@@ -44,7 +49,118 @@ def validate_model_against_standard(model_code, standard="Data Vault"):
     prompt = f"Validate this DOT code against {standard} standards:\n{model_code}"
     return get_ai_suggestion(prompt)
 
-# Main App: Daily Companion for Enterprise Data Architects
+# Export Functions
+def export_to_pdf():
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
+
+    story.append(Paragraph("Data Architecture Navigator Export", styles['Title']))
+    story.append(Spacer(1, 12))
+
+    # Data Models
+    story.append(Paragraph("Data Models", styles['Heading2']))
+    for name, model in state["data_models"].items():
+        data = [
+            ["Name", name],
+            ["DOT Code", model["dot_code"]],
+            ["Version", str(model["version"])]
+        ]
+        story.append(Table(data))
+        story.append(Spacer(1, 12))
+
+    # Policies
+    story.append(Paragraph("Policies", styles['Heading2']))
+    for title, policy in state["policies"].items():
+        data = [
+            ["Title", title],
+            ["Content", policy["content"]],
+            ["Status", policy["status"]]
+        ]
+        story.append(Table(data))
+        story.append(Spacer(1, 12))
+
+    # Systems
+    story.append(Paragraph("Systems", styles['Heading2']))
+    for name, sys in state["systems"].items():
+        data = [
+            ["Name", name],
+            ["Description", sys["desc"]],
+            ["Health", sys["health"]]
+        ]
+        story.append(Table(data))
+        story.append(Spacer(1, 12))
+
+    # Change Requests
+    story.append(Paragraph("Change Requests", styles['Heading2']))
+    for req in state["change_requests"]:
+        data = [
+            ["Title", req["title"]],
+            ["Impact", req["impact"]],
+            ["Status", req["status"]],
+            ["Date", req["date"]]
+        ]
+        story.append(Table(data))
+        story.append(Spacer(1, 12))
+
+    # Knowledge Base
+    story.append(Paragraph("Knowledge Base", styles['Heading2']))
+    for doc in state["knowledge_base"]:
+        data = [
+            ["Title", doc["title"]],
+            ["Content", doc["content"]],
+            ["Tags", ", ".join(doc["tags"])]
+        ]
+        story.append(Table(data))
+        story.append(Spacer(1, 12))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
+def export_to_csv():
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    
+    # Headers for CSV
+    writer.writerow(["Section", "Key", "Details"])
+    
+    # Data Models
+    for name, model in state["data_models"].items():
+        writer.writerow(["Data Models", "Name", name])
+        writer.writerow(["Data Models", "DOT Code", model["dot_code"]])
+        writer.writerow(["Data Models", "Version", model["version"]])
+    
+    # Policies
+    for title, policy in state["policies"].items():
+        writer.writerow(["Policies", "Title", title])
+        writer.writerow(["Policies", "Content", policy["content"]])
+        writer.writerow(["Policies", "Status", policy["status"]])
+    
+    # Systems
+    for name, sys in state["systems"].items():
+        writer.writerow(["Systems", "Name", name])
+        writer.writerow(["Systems", "Description", sys["desc"]])
+        writer.writerow(["Systems", "Health", sys["health"]])
+    
+    # Change Requests
+    for req in state["change_requests"]:
+        writer.writerow(["Change Requests", "Title", req["title"]])
+        writer.writerow(["Change Requests", "Impact", req["impact"]])
+        writer.writerow(["Change Requests", "Status", req["status"]])
+        writer.writerow(["Change Requests", "Date", req["date"]])
+    
+    # Knowledge Base
+    for doc in state["knowledge_base"]:
+        writer.writerow(["Knowledge Base", "Title", doc["title"]])
+        writer.writerow(["Knowledge Base", "Content", doc["content"]])
+        writer.writerow(["Knowledge Base", "Tags", ", ".join(doc["tags"])])
+    
+    buffer.seek(0)
+    return buffer
+
+# Main App
 st.set_page_config(page_title="Data Architecture Navigator", layout="wide")
 st.sidebar.title("Data Architecture Navigator")
 st.sidebar.write("Your daily companion for managing enterprise data architecture.")
@@ -56,10 +172,30 @@ section = st.sidebar.radio("Daily Tasks", [
     "Security & Compliance", 
     "Change Management", 
     "Knowledge Base",
-    "Guide"  # New section for user guide
+    "Guide"
 ])
 
-# Dashboard: Daily Overview
+# Export Buttons in Sidebar
+st.sidebar.subheader("Export Data")
+if st.sidebar.button("Export to PDF"):
+    pdf_buffer = export_to_pdf()
+    st.sidebar.download_button(
+        label="Download PDF",
+        data=pdf_buffer,
+        file_name=f"data_architecture_export_{datetime.now().strftime('%Y%m%d')}.pdf",
+        mime="application/pdf"
+    )
+
+if st.sidebar.button("Export to CSV"):
+    csv_buffer = export_to_csv()
+    st.sidebar.download_button(
+        label="Download CSV",
+        data=csv_buffer.getvalue(),
+        file_name=f"data_architecture_export_{datetime.now().strftime('%Y%m%d')}.csv",
+        mime="text/csv"
+    )
+
+# Dashboard
 if section == "Dashboard":
     st.header("Daily Dashboard")
     st.write("Start your day with a snapshot of your data ecosystem.")
@@ -77,7 +213,7 @@ if section == "Dashboard":
     for req in state["change_requests"][-3:]:
         st.write(f"- {req['title']} (Status: {req['status']})")
 
-# Data Models & Blueprints: Daily Modeling Tasks
+# Data Models & Blueprints
 elif section == "Data Models & Blueprints":
     st.header("Data Models & Blueprints")
     st.write("Manage and validate your models throughout the day.")
@@ -118,7 +254,7 @@ elif section == "Data Models & Blueprints":
                 suggestion = get_ai_suggestion(f"Optimize this data model DOT code:\n{dot}")
                 st.write("AI Suggestion:", suggestion)
 
-# Data Governance: Daily Policy Checks
+# Data Governance
 elif section == "Data Governance":
     st.header("Data Governance")
     st.write("Ensure compliance and standards throughout the day.")
@@ -128,8 +264,9 @@ elif section == "Data Governance":
         st.subheader("Policy Library")
         policy_title = st.text_input("Policy Title")
         policy_content = st.text_area("Policy Content", help="e.g., Data retention rules")
+        policy_status = st.selectbox("Status", ["Draft", "Approved", "Retired"])
         if st.button("Add Policy"):
-            state["policies"][policy_title] = {"content": policy_content, "status": "Draft"}
+            state["policies"][policy_title] = {"content": policy_content, "status": policy_status}
             st.success(f"Added {policy_title} for review")
         for title, policy in state["policies"].items():
             st.write(f"**{title}** (Status: {policy['status']})\n{policy['content']}")
@@ -140,7 +277,7 @@ elif section == "Data Governance":
         if st.button("Submit Issue"):
             st.success(f"Issue logged: {issue}")
 
-# Data Landscape: Daily System Monitoring
+# Data Landscape
 elif section == "Data Landscape":
     st.header("Data Landscape")
     st.write("Track your systems and flows daily.")
@@ -158,7 +295,7 @@ elif section == "Data Landscape":
         dot = "digraph { " + " -> ".join(state["systems"].keys()) + " }"
         display_data_model(dot, "Daily Data Flow")
 
-# Security & Compliance: Daily Checks
+# Security & Compliance
 elif section == "Security & Compliance":
     st.header("Security & Compliance")
     st.write("Stay compliant with daily classification tasks.")
@@ -168,7 +305,7 @@ elif section == "Security & Compliance":
     if st.button("Classify"):
         st.success(f"Data classified as {data_type} for today’s records")
 
-# Change Management: Daily Change Tracking
+# Change Management
 elif section == "Change Management":
     st.header("Change Management")
     st.write("Log and assess changes throughout the day.")
@@ -186,7 +323,7 @@ elif section == "Change Management":
     for req in state["change_requests"]:
         st.write(f"- {req['title']} (Status: {req['status']}, Date: {req['date']})")
 
-# Knowledge Base: Daily Reference
+# Knowledge Base
 elif section == "Knowledge Base":
     st.header("Knowledge Base")
     st.write("Quick access to your daily references.")
@@ -203,7 +340,7 @@ elif section == "Knowledge Base":
     for doc in state["knowledge_base"]:
         st.write(f"**{doc['title']}** (Tags: {', '.join(doc['tags'])})\n{doc['content']}")
 
-# Guide: Separate Page for Tech Stack Reference
+# Guide
 elif section == "Guide":
     st.header("Data Architecture Navigator Guide")
     st.write("This tool is your daily companion, integrating with your tech stack to streamline Enterprise Data Architect responsibilities.")
@@ -270,6 +407,6 @@ elif section == "Guide":
     - **Collaboration**: Future commenting features planned.
     """)
 
-# Footer: Daily Context
+# Footer
 st.sidebar.write(f"Current Date: {datetime.now().strftime('%B %d, %Y')}")
 st.sidebar.write("Tech Stack: Snowflake, Databricks, Tableau, Google AI")
