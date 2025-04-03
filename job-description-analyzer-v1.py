@@ -6,7 +6,7 @@ from collections import defaultdict
 # Set page config as the first Streamlit command
 st.set_page_config(page_title="Job Description Analyzer", layout="wide")
 
-# Custom CSS for a beautiful, clean look
+# Custom CSS for a clean, beautiful look without redundant dashes/dots
 st.markdown("""
     <style>
     .main {
@@ -51,20 +51,12 @@ st.markdown("""
         font-weight: 600;
         color: #1a3c34;
         margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-    }
-    .section-title::before {
-        content: "•";
-        color: #2ecc71;
-        font-size: 24px;
-        margin-right: 10px;
     }
     .section-content {
         font-size: 16px;
         color: #34495e;
         line-height: 1.8;
-        margin-left: 10px; /* Offset to align with title bullet */
+        margin-left: 0; /* Removed offset to avoid redundancy */
     }
     .section-content ul {
         list-style-type: none; /* Remove default bullets */
@@ -72,12 +64,14 @@ st.markdown("""
     }
     .section-content li {
         margin-bottom: 10px;
+        padding-left: 20px; /* Space for custom bullet */
     }
     .section-content li::before {
         content: "•";
         color: #2ecc71;
         font-size: 16px;
-        margin-right: 10px;
+        position: absolute;
+        margin-left: -20px;
     }
     .stButton>button {
         background-color: #2ecc71;
