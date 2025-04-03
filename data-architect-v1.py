@@ -10,6 +10,12 @@ with st.sidebar:
     st.markdown("A tool to help assess and improve skills for Data Architect roles")
     # Navigation
     page = st.radio("Navigation", ["Guide"])
+    # Current date in sidebar
+    st.markdown(f"**Current Date**: {datetime.now().strftime('%B %d, %Y')}")
+    # Tech stack in sidebar
+    st.markdown("**Tech Stack**:")
+    st.markdown("- Streamlit")
+    st.markdown("- datetime")
 
 # Main content
 if page == "Guide":
@@ -41,6 +47,3 @@ if page == "Guide":
     - **Collaboration**: Strong communication and leadership skills
     - **Analytical Thinking**: Problem-solving capabilities
     """)
-    
-    # Footer with current date
-    st.markdown(f"Last updated: {datetime.now().strftime('%B %d, %Y')}")
