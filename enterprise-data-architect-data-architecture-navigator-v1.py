@@ -9,15 +9,6 @@ from reportlab.lib.styles import getSampleStyleSheet  # Kept for potential futur
 import csv  # Kept for potential future use, though not used here
 import io  # Kept for potential future use, though not used here
 
-# Simulated in-memory storage (not used in this version but kept for consistency)
-state = {
-    "data_models": {},
-    "policies": {},
-    "systems": {},
-    "change_requests": [],
-    "knowledge_base": []
-}
-
 # Google Generative Language API configuration (not used in this version but kept for consistency)
 API_KEY = "YOUR_GEMINI_API_KEY_HERE"  # Replace with your actual API key or use st.secrets
 API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
