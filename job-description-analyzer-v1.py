@@ -85,15 +85,6 @@ def main():
         
         if error_message:
             st.warning(error_message)
-        
-        tab1, tab2, tab3 = st.tabs(["Tools and Tech Stack", "Desired Activities", "Required Skills"])
-        
-        with tab1:
-            st.markdown("\n".join(f"- {item}" for item in analysis["Tools and Tech Stack"]) or "No tools identified")
-        with tab2:
-            st.markdown("\n".join(f"- {item}" for item in analysis["Desired Activities"]) or "No activities identified")
-        with tab3:
-            st.markdown("\n".join(f"- {item}" for item in analysis["Required Skills"]) or "No skills identified")
 
 if __name__ == "__main__":
     main()
