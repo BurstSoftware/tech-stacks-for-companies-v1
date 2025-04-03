@@ -48,19 +48,19 @@ st.markdown("""
         color: #1a3c34;
         margin-bottom: 15px;
     }
-    .main-category {
+    .main-point {
         font-size: 18px;
         font-style: italic;
         color: #34495e;
         margin-bottom: 10px;
     }
-    .detail {
+    .sub-detail {
         font-size: 16px;
         color: #34495e;
         margin-left: 20px;
         margin-bottom: 8px;
     }
-    .detail u {
+    .sub-detail u {
         text-decoration: underline;
     }
     .stButton>button {
@@ -134,7 +134,6 @@ def parse_response(response):
     sections = defaultdict(list)
     lines = response.split('\n')
     current_section = None
-    current_category = None
     
     section_keywords = {
         "Key Tasks and Responsibilities": ["tasks", "responsibilities", "duties", "perform"],
@@ -143,8 +142,6 @@ def parse_response(response):
         "Tech Stack Integration": ["tech", "stack", "integration", "integrates"],
         "Implementation Notes": ["implementation", "notes", "how to", "approach"]
     }
-    
-    category_keywords = ["governance", "change", "security", "collaboration", "monitoring", "automation", "strategy", "standards", "management"]
     
     if response.startswith("Error:"):
         return sections, response
@@ -155,7 +152,6 @@ def parse_response(response):
             continue
         
         lower_line = line.lower()
-        # Detect main sections using numbered list
         if any(lower_line.startswith(f"{i}.") for i in range(1, 6)):
             if "tasks" in lower_line or "responsibilities" in lower_line:
                 current_section = "Key Tasks and Responsibilities"
@@ -168,16 +164,18 @@ def parse_response(response):
             elif "implementation" in lower_line or "notes" in lower_line:
                 current_section = "Implementation Notes"
             sections[current_section].append(line.lstrip("12345.").strip())
-            current_category = None
         elif current_section:
-            # Detect categories within sections (e.g., "Governance and Standards")
-            if line.startswith("**") or any(kw in lower_line for kw in category_keywords):
-                category = line.replace("**", "").replace(":", "").strip()
-                sections[current_section].append(f"category:{category}")
-                current_category = category
-            else:
-                # Add as a detail under the current section/category
-                sections[current_section].append(line)
+            for section, keywords in section_keywords.items():
+                if any(keyword in lower_line for keyword in keywords) and section != current_section:
+                    current_section = section
+                    break
+            sections[current_section].append(line)
+        else:
+            for section, keywords in section_keywords.items():
+                if any(keyword in lower_line for keyword in keywords):
+                    current_section = section
+                    sections[current_section].append(line)
+                    break
     
     if not any(sections.values()):
         return sections, "Error: Could not extract meaningful sections from the response"
@@ -231,12 +229,11 @@ def main():
                     with st.container():
                         st.markdown(f"<div class='section-container'><div class='section-title'><b>{section}</b></div>", unsafe_allow_html=True)
                         content_lines = analysis[section] if analysis[section] else ["No details identified"]
-                        for line in content_lines:
-                            if line.startswith("category:"):
-                                category = line.replace("category:", "").strip()
-                                st.markdown(f"<div class='main-category'><i>{category}</i></div>", unsafe_allow_html=True)
+                        for i, line in enumerate(content_lines):
+                            if i == 0:
+                                st.markdown(f"<div class='main-point'><i>{line}</i></div>", unsafe_allow_html=True)
                             else:
-                                st.markdown(f"<div class='detail'>{line}</div>", unsafe_allow_html=True)
+                                st.markdown(f"<div class='sub-detail'>{line}</div>", unsafe_allow_html=True)
                         st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
