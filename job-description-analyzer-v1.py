@@ -101,15 +101,12 @@ def process_job_description(api_key, job_description):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     
-    # Updated prompt to include business category and type as part of the analysis
     prompt = f"""Provide a detailed analysis of this job description, covering:
-    1. Business Category and Type (for a tool analyzing this job description)
-    2. Key tasks and responsibilities
-    3. Skills required
-    4. A brief overview of a tool design to support the role
-    5. How the tech stack integrates
-    6. Notes on implementation
-    For the Business Category and Type, assume the tool is a web-based application designed to analyze job descriptions.
+    1. Key tasks and responsibilities
+    2. Skills required
+    3. A brief overview of a tool design to support the role
+    4. How the tech stack integrates
+    5. Notes on implementation
     Job Description: {job_description}"""
 
     payload = {
@@ -132,9 +129,7 @@ def parse_response(response):
     lines = response.split('\n')
     current_section = None
     
-    # Updated section keywords to include Business Category and Type
     section_keywords = {
-        "Business Category and Type": ["category", "type", "business"],
         "Key Tasks and Responsibilities": ["tasks", "responsibilities", "duties", "perform"],
         "Skills Required": ["skills", "required", "qualifications", "abilities"],
         "Tool Design Overview": ["tool", "design", "overview", "support"],
@@ -151,10 +146,8 @@ def parse_response(response):
             continue
         
         lower_line = line.lower()
-        if any(lower_line.startswith(f"{i}.") for i in range(1, 7)):  # Updated range to 7 to account for new section
-            if "category" in lower_line or "type" in lower_line or "business" in lower_line:
-                current_section = "Business Category and Type"
-            elif "tasks" in lower_line or "responsibilities" in lower_line:
+        if any(lower_line.startswith(f"{i}.") for i in range(1, 6)):
+            if "tasks" in lower_line or "responsibilities" in lower_line:
                 current_section = "Key Tasks and Responsibilities"
             elif "skills" in lower_line or "required" in lower_line:
                 current_section = "Skills Required"
@@ -164,7 +157,7 @@ def parse_response(response):
                 current_section = "Tech Stack Integration"
             elif "implementation" in lower_line or "notes" in lower_line:
                 current_section = "Implementation Notes"
-            sections[current_section].append(line.lstrip("123456.").strip())
+            sections[current_section].append(line.lstrip("12345.").strip())
         elif current_section:
             for section, keywords in section_keywords.items():
                 if any(keyword in lower_line for keyword in keywords) and section != current_section:
@@ -177,13 +170,6 @@ def parse_response(response):
                     current_section = section
                     sections[current_section].append(line)
                     break
-    
-    # Fallback: If Business Category and Type is missing, add defaults
-    if not sections["Business Category and Type"]:
-        sections["Business Category and Type"] = [
-            "Category: Technology / HR Tech",
-            "Type: Software as a Service (SaaS)"
-        ]
     
     if not any(sections.values()):
         return sections, "Error: Could not extract meaningful sections from the response"
@@ -232,9 +218,15 @@ def main():
                 st.error(error_message)
             else:
                 st.markdown("### Your Analysis")
-                # Display all sections dynamically, including Business Category and Type
-                for section in ["Business Category and Type", "Key Tasks and Responsibilities", "Skills Required", 
-                                "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
+                # Add Business Category and Type
+                with st.container():
+                    st.markdown("<div class='section-container'><div class='section-title'>Business Context</div><div class='section-content'>", unsafe_allow_html=True)
+                    st.markdown("- **Category**: Technology / HR Tech")
+                    st.markdown("- **Type**: Software as a Service (SaaS)")
+                    st.markdown("</div></div>", unsafe_allow_html=True)
+                
+                # Display the rest of the analysis
+                for section in ["Key Tasks and Responsibilities", "Skills Required", "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
                     with st.container():
                         st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'>", unsafe_allow_html=True)
                         content = "\n".join(f"- {item}" for item in analysis[section]) or "No details identified"
