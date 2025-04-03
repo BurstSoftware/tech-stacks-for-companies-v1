@@ -6,61 +6,93 @@ from collections import defaultdict
 # Set page config as the first Streamlit command
 st.set_page_config(page_title="Job Description Analyzer", layout="wide")
 
-# Custom CSS for a professional look
+# Custom CSS for a clean, beautiful look
 st.markdown("""
     <style>
     .main {
-        background-color: #f5f7fa;
+        background-color: #fafafa;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .header-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a3c34;
+        margin-bottom: 5px;
+    }
+    .header-subtitle {
+        font-size: 18px;
+        color: #5e6e66;
+        margin-bottom: 30px;
+    }
+    .input-container {
+        background-color: #ffffff;
         padding: 20px;
         border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
     }
     .section-container {
         background-color: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
     }
     .section-title {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 10px;
+        color: #1a3c34;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+    }
+    .section-title::before {
+        content: "•";
+        color: #2ecc71;
+        font-size: 24px;
+        margin-right: 10px;
     }
     .section-content {
         font-size: 16px;
-        color: #333333;
+        color: #34495e;
+        line-height: 1.6;
     }
     .stButton>button {
-        background-color: #4a90e2;
+        background-color: #2ecc71;
         color: white;
-        border-radius: 5px;
-        padding: 10px 20px;
-        font-weight: bold;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 16px;
+        border: none;
     }
     .stButton>button:hover {
-        background-color: #357abd;
+        background-color: #27ae60;
     }
     .stTextInput>label, .stRadio>label, .stFileUploader>label {
         font-size: 16px;
-        color: #4a4a4a;
+        color: #1a3c34;
         font-weight: 500;
     }
+    .stTextInput>div>input, .stTextArea>div>textarea {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px;
+    }
     .stSuccess {
-        background-color: #e6f4ea;
+        background-color: #e8f5e9;
         color: #2e7d32;
-        border: 1px solid #2e7d32;
-        border-radius: 5px;
+        border-radius: 8px;
+        padding: 10px;
     }
     .stError {
         background-color: #ffebee;
         color: #c62828;
-        border: 1px solid #c62828;
-        border-radius: 5px;
-    }
-    h1, h2 {
-        color: #2c3e50;
+        border-radius: 8px;
+        padding: 10px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -97,7 +129,6 @@ def parse_response(response):
     lines = response.split('\n')
     current_section = None
     
-    # Keywords to identify sections
     section_keywords = {
         "Key Tasks and Responsibilities": ["tasks", "responsibilities", "duties", "perform"],
         "Skills Required": ["skills", "required", "qualifications", "abilities"],
@@ -114,7 +145,6 @@ def parse_response(response):
         if not line:
             continue
         
-        # Check for numbered sections (e.g., "1.", "2.") or keywords
         lower_line = line.lower()
         if any(lower_line.startswith(f"{i}.") for i in range(1, 6)):
             if "tasks" in lower_line or "responsibilities" in lower_line:
@@ -129,14 +159,12 @@ def parse_response(response):
                 current_section = "Implementation Notes"
             sections[current_section].append(line.lstrip("12345.").strip())
         elif current_section:
-            # Add to current section if it’s a continuation
             for section, keywords in section_keywords.items():
                 if any(keyword in lower_line for keyword in keywords) and section != current_section:
                     current_section = section
                     break
             sections[current_section].append(line)
         else:
-            # Fallback: Look for keywords to start a section
             for section, keywords in section_keywords.items():
                 if any(keyword in lower_line for keyword in keywords):
                     current_section = section
@@ -144,56 +172,58 @@ def parse_response(response):
                     break
     
     if not any(sections.values()):
-        return sections, "Warning: Could not extract meaningful sections from the response"
+        return sections, "Error: Could not extract meaningful sections from the response"
     
     return sections, None
 
 def main():
-    # Header
-    st.title("Job Description Analyzer")
-    st.subheader("Transform Job Descriptions into Actionable Insights")
-
-    # Input Section
+    # Main container for centering
     with st.container():
-        st.markdown("### Input Your Job Description")
-        with st.expander("Enter Details", expanded=True):
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                api_key = st.text_input("Google AI Studio API Key", type="password", help="Enter your API key securely")
-            with col2:
-                job_input_method = st.radio("Input Method", ["Paste Text", "Upload File"], horizontal=True)
-            
-            job_description = ""
-            if job_input_method == "Paste Text":
-                job_description = st.text_area("Job Description", height=200, help="Paste the job description here")
-            else:
-                uploaded_file = st.file_uploader("Upload Job Description", type=["txt", "md"], help="Upload a text or markdown file")
-                if uploaded_file:
-                    job_description = uploaded_file.read().decode("utf-8")
+        # Header
+        st.markdown("<h1 class='header-title'>Job Description Analyzer</h1>", unsafe_allow_html=True)
+        st.markdown("<div class='header-subtitle'>Unlock Insights from Job Descriptions with Ease</div>", unsafe_allow_html=True)
 
-    # Process Button
-    if st.button("Analyze Job Description"):
-        if not api_key or not job_description:
-            st.error("Please provide both an API key and a job description.")
-        else:
-            with st.spinner("Analyzing your job description..."):
-                st.session_state.breakdown_result = process_job_description(api_key, job_description)
-                st.success("Analysis completed successfully!")
-
-    # Results Section
-    if "breakdown_result" in st.session_state:
-        analysis, error_message = parse_response(st.session_state.breakdown_result)
-        
-        if error_message:
-            st.error(error_message)
-        else:
-            st.markdown("### Analysis Results")
+        # Input Section
+        with st.container():
+            st.markdown("### Provide Your Details")
             with st.container():
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    api_key = st.text_input("API Key", type="password", help="Enter your Google AI Studio API key")
+                with col2:
+                    job_input_method = st.radio("Input Method", ["Text", "File"], horizontal=True)
+                
+                job_description = ""
+                if job_input_method == "Text":
+                    job_description = st.text_area("Job Description", height=150, placeholder="Paste your job description here...")
+                else:
+                    uploaded_file = st.file_uploader("Upload File", type=["txt", "md"], help="Upload a text or markdown file")
+                    if uploaded_file:
+                        job_description = uploaded_file.read().decode("utf-8")
+
+        # Process Button
+        if st.button("Analyze Now"):
+            if not api_key or not job_description:
+                st.error("Please provide both an API key and a job description.")
+            else:
+                with st.spinner("Analyzing..."):
+                    st.session_state.breakdown_result = process_job_description(api_key, job_description)
+                    st.success("Analysis Complete!")
+
+        # Results Section
+        if "breakdown_result" in st.session_state:
+            analysis, error_message = parse_response(st.session_state.breakdown_result)
+            
+            if error_message:
+                st.error(error_message)
+            else:
+                st.markdown("### Your Analysis")
                 for section in ["Key Tasks and Responsibilities", "Skills Required", "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
-                    st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'>", unsafe_allow_html=True)
-                    content = "\n".join(f"- {item}" for item in analysis[section]) or "No details identified"
-                    st.markdown(content)
-                    st.markdown("</div></div>", unsafe_allow_html=True)
+                    with st.container():
+                        st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'>", unsafe_allow_html=True)
+                        content = "\n".join(f"- {item}" for item in analysis[section]) or "No details identified"
+                        st.markdown(content)
+                        st.markdown("</div></div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
