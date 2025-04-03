@@ -6,43 +6,48 @@ from collections import defaultdict
 # Set page config as the first Streamlit command
 st.set_page_config(page_title="Job Description Analyzer", layout="wide")
 
-# Custom CSS for a clean, beautiful look
+# Custom CSS for a beautiful, clean look
 st.markdown("""
     <style>
     .main {
-        background-color: #fafafa;
-        padding: 30px;
-        border-radius: 12px;
+        background-color: #f9f9f9;
+        padding: 40px;
         max-width: 1200px;
         margin: 0 auto;
     }
     .header-title {
-        font-size: 32px;
+        font-size: 36px;
         font-weight: 700;
         color: #1a3c34;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
+        text-align: center;
     }
     .header-subtitle {
-        font-size: 18px;
+        font-size: 20px;
         color: #5e6e66;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
+        text-align: center;
     }
     .input-container {
         background-color: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        margin-bottom: 30px;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+        margin-bottom: 40px;
     }
     .section-container {
         background-color: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+        transition: transform 0.2s;
+    }
+    .section-container:hover {
+        transform: translateY(-5px);
     }
     .section-title {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 600;
         color: #1a3c34;
         margin-bottom: 15px;
@@ -58,16 +63,31 @@ st.markdown("""
     .section-content {
         font-size: 16px;
         color: #34495e;
-        line-height: 1.6;
+        line-height: 1.8;
+        margin-left: 10px; /* Offset to align with title bullet */
+    }
+    .section-content ul {
+        list-style-type: none; /* Remove default bullets */
+        padding-left: 0;
+    }
+    .section-content li {
+        margin-bottom: 10px;
+    }
+    .section-content li::before {
+        content: "•";
+        color: #2ecc71;
+        font-size: 16px;
+        margin-right: 10px;
     }
     .stButton>button {
         background-color: #2ecc71;
         color: white;
         border-radius: 8px;
-        padding: 12px 24px;
+        padding: 12px 30px;
         font-weight: 600;
         font-size: 16px;
         border: none;
+        transition: background-color 0.3s;
     }
     .stButton>button:hover {
         background-color: #27ae60;
@@ -80,19 +100,22 @@ st.markdown("""
     .stTextInput>div>input, .stTextArea>div>textarea {
         border: 1px solid #e0e0e0;
         border-radius: 6px;
-        padding: 10px;
+        padding: 12px;
+        background-color: #f9f9f9;
     }
     .stSuccess {
         background-color: #e8f5e9;
         color: #2e7d32;
         border-radius: 8px;
-        padding: 10px;
+        padding: 12px;
+        margin-top: 10px;
     }
     .stError {
         background-color: #ffebee;
         color: #c62828;
         border-radius: 8px;
-        padding: 10px;
+        padding: 12px;
+        margin-top: 10px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -185,21 +208,22 @@ def main():
 
         # Input Section
         with st.container():
+            st.markdown("<div class='input-container'>", unsafe_allow_html=True)
             st.markdown("### Provide Your Details")
-            with st.container():
-                col1, col2 = st.columns([3, 1])
-                with col1:
-                    api_key = st.text_input("API Key", type="password", help="Enter your Google AI Studio API key")
-                with col2:
-                    job_input_method = st.radio("Input Method", ["Text", "File"], horizontal=True)
-                
-                job_description = ""
-                if job_input_method == "Text":
-                    job_description = st.text_area("Job Description", height=150, placeholder="Paste your job description here...")
-                else:
-                    uploaded_file = st.file_uploader("Upload File", type=["txt", "md"], help="Upload a text or markdown file")
-                    if uploaded_file:
-                        job_description = uploaded_file.read().decode("utf-8")
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                api_key = st.text_input("API Key", type="password", help="Enter your Google AI Studio API key")
+            with col2:
+                job_input_method = st.radio("Input Method", ["Text", "File"], horizontal=True)
+            
+            job_description = ""
+            if job_input_method == "Text":
+                job_description = st.text_area("Job Description", height=150, placeholder="Paste your job description here...")
+            else:
+                uploaded_file = st.file_uploader("Upload File", type=["txt", "md"], help="Upload a text or markdown file")
+                if uploaded_file:
+                    job_description = uploaded_file.read().decode("utf-8")
+            st.markdown("</div>", unsafe_allow_html=True)
 
         # Process Button
         if st.button("Analyze Now"):
@@ -217,13 +241,13 @@ def main():
             if error_message:
                 st.error(error_message)
             else:
-                st.markdown("### Your Analysis")
+                st.markdown("<h2 class='header-title'>Your Analysis</h2>", unsafe_allow_html=True)
                 for section in ["Key Tasks and Responsibilities", "Skills Required", "Tool Design Overview", "Tech Stack Integration", "Implementation Notes"]:
                     with st.container():
-                        st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'>", unsafe_allow_html=True)
-                        content = "\n".join(f"- {item}" for item in analysis[section]) or "No details identified"
-                        st.markdown(content)
-                        st.markdown("</div></div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='section-container'><div class='section-title'>{section}</div><div class='section-content'><ul>", unsafe_allow_html=True)
+                        content = "\n".join(f"<li>{item}</li>" for item in analysis[section]) if analysis[section] else "<li>No details identified</li>"
+                        st.markdown(content, unsafe_allow_html=True)
+                        st.markdown("</ul></div></div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
