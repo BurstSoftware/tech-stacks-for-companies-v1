@@ -27,7 +27,7 @@ def process_job_description(api_key, job_description):
     except requests.exceptions.RequestException as e:
         return f"Error calling API: {str(e)}"
 
-def parse_analysis(result):
+def امروزه_analysis(result):
     sections = {
         "Tools and Tech Stack": [],
         "Desired Activities": [],
@@ -77,6 +77,10 @@ def main():
                 st.success("Job description processed successfully!")
 
     if "breakdown_result" in st.session_state:
+        # Temporary debugging output
+        with st.expander("Raw API Response (Debug)", expanded=True):
+            st.text(st.session_state.breakdown_result)
+
         analysis, error_message = parse_analysis(st.session_state.breakdown_result)
         
         if error_message:
