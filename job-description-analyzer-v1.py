@@ -6,10 +6,11 @@ def process_job_description(api_key, job_description):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     
-    prompt = f"""Analyze this job description and provide a detailed breakdown in the following structured format:
-    - Tools and Tech Stack: [list specific tools/tech mentioned in the job description]
-    - Desired Activities: [list specific activities the employee would perform]
-    - Required Skills: [list specific skills required for the role]
+    prompt = f"""Analyze this job description and return the response in this exact structured markdown format:
+    - Tools and Tech Stack: [list tools/tech here, e.g., Python, SQL]
+    - Desired Activities: [list activities here, e.g., Analyze data]
+    - Required Skills: [list skills here, e.g., Programming]
+    If no items are identified for a section, use an empty list [].
     Job Description: {job_description}"""
 
     payload = {
@@ -27,7 +28,7 @@ def process_job_description(api_key, job_description):
     except requests.exceptions.RequestException as e:
         return f"Error calling API: {str(e)}"
 
-def امروزه_analysis(result):
+def parse_analysis(result):
     sections = {
         "Tools and Tech Stack": [],
         "Desired Activities": [],
@@ -77,7 +78,6 @@ def main():
                 st.success("Job description processed successfully!")
 
     if "breakdown_result" in st.session_state:
-        # Temporary debugging output
         with st.expander("Raw API Response (Debug)", expanded=True):
             st.text(st.session_state.breakdown_result)
 
