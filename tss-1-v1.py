@@ -6,7 +6,7 @@ st.set_page_config(page_title="Technical Support Specialist I - Job Description"
 # Title and introduction
 st.title("Technical Support Specialist I - Job Description")
 st.markdown("""
-Are you a tech-savvy problem-solver with a passion for helping others? Spherion Staffing is seeking a **Technical Support Specialist I** for a direct-hire, full-time, hybrid position in Mankato, MN. This is an excellent opportunity to join a dynamic team and make a real impact! Below are the key responsibilities for this role, organized by category.
+Job Description
 """)
 
 # Collapsible sections for responsibilities
