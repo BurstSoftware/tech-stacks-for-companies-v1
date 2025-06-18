@@ -5,9 +5,6 @@ st.set_page_config(page_title="Technical Support Specialist I - Job Description"
 
 # Title and introduction
 st.title("Technical Support Specialist I - Job Description")
-st.markdown("""
-Job Description
-""")
 
 # Collapsible sections for responsibilities
 st.header("Responsibilities")
